@@ -1,0 +1,271 @@
+{% extends 'store/base.html' %}
+{% load filter_tags %}
+{% block content %}
+{% get_images_tag product.id as images %}
+<div id="content">
+     <div class="container">
+          <div class="row">
+            <div class="col-lg-12">
+              <!-- breadcrumb-->
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Home</a></li>
+                  <li class="breadcrumb-item text-capitalize"><a href="{% url 'store:gender-category-list' product.gender %}">{{ product.gender }}</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'store:subcategory-product-list' product.gender product.subcategory.slug %}">{{ product.subcategory }}</a></li>
+                  <li aria-current="page" class="breadcrumb-item active">{{ product.name }}</li>
+                </ol>
+              </nav>
+            </div>
+
+              <div class="col-lg-3 order-2 order-lg-1">
+              <!--
+              *** MENUS AND FILTERS ***
+              _________________________________________________________
+              -->
+              <div class="card sidebar-menu mb-4">
+                <div class="card-header">
+                  <h3 class="h4 card-title">Categories</h3>
+                </div>
+                <div class="card-body">
+                  <ul class="nav nav-pills flex-column category-menu">
+                    {% for gen in genders %}{% if gen != 'unisex' %}
+                    <li><a href="{% url 'store:gender-category-list' gen %}" class="nav-link {% if gen == current_gender %}active{% endif %}">{{ gen }}  <span class="badge badge-light">123</span></a>
+                      <ul class="list-unstyled">
+                        {% for category in static_categories %}
+                        {% subcategory_tag category.id gen as subcategories %}
+                        <li><a href="" class="nav-link" data-toggle="collapse" data-target="#{{ gen }}{{ category.name }}" aria-expanded="false" aria-controls="{{ category.name }}">{{ category.name }}</a></li>
+                        <div class="pl-4"  id="{{ gen }}{{ category.name }}" aria-expanded="true">
+                          {% for subcategory in subcategories %}
+                          <li class="font-italic"><a href="{% url 'store:subcategory-product-list' gen subcategory.slug %}">{{ subcategory.name }}</a></li>
+                          {% endfor %}
+                        </div>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                     {% endif %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+              <div class="card sidebar-menu mb-4">
+                <div class="card-header">
+                  <h3 class="h4 card-title">Brands <a href="#" class="btn btn-sm btn-danger pull-right"><i class="fa fa-times-circle"></i> Clear</a></h3>
+                </div>
+                <div class="card-body">
+                  <form>
+                    <div class="form-group">
+                      {% for brand in brands %}
+                      {% brands_amount_tag brand.id as amount %}
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox"> {{ brand.name }}  ({{ amount }})
+                        </label>
+                      </div>
+                      {% endfor %}
+                    </div>
+                    <button class="btn btn-default btn-sm btn-primary"><i class="fa fa-pencil"></i> Apply</button>
+                  </form>
+                </div>
+              </div>
+              <div class="card sidebar-menu mb-4">
+                <div class="card-header">
+                  <h3 class="h4 card-title">Colors <a href="#" class="btn btn-sm btn-danger pull-right"><i class="fa fa-times-circle"></i> Clear</a></h3>
+                </div>
+                <div class="card-body">
+                  <form>
+                    <div class="form-group">
+                      {% colors_tag as colors %}
+                      {% for color in colors %}
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox">{{ color.name }} ({{ color.productitem_set.count }})
+                        </label>
+                      </div>
+                      {% endfor %}
+                    </div>
+                    <button class="btn btn-default btn-sm btn-primary"><i class="fa fa-pencil"></i> Apply</button>
+                  </form>
+                </div>
+              </div>
+              <!-- *** MENUS AND FILTERS END ***-->
+              <div class="banner"><a href="#"><img src="{{ product.image.url }}" alt="sales 2014" class="img-fluid"></a></div>
+            </div>
+            <div class="col-lg-9 order-1 order-lg-2">
+              <div id="productMain" class="row">
+                <div class="col-md-6">
+                  <div data-slider-id="1" class="owl-carousel shop-detail-carousel">
+                    {% for image in images %}
+                    <div class="item"> <img src="{{ image.image.url }}" alt="" class="img-fluid"></div>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="box">
+                    <h1 class="text-center">{{ product.name }}</h1>
+                    <p class="goToDescription"><a href="#details" class="scroll-to">Scroll to product details, material &amp; care and sizing</a></p>
+                    <p class="price"> {{ product.price }} $</p>
+                    <form action="{% url 'order:cart_add' product.id %}" id="item-size" method="post">
+                      {% csrf_token %}
+                      <div class="row">
+                        <div class="col-6">
+                          <label for="item-size">Available size:</label>
+                          <select name="size" class="form-control">
+                            {% for item in items %}
+                            <option>{{ item.size }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="col-6">
+                          <label for="quantity">Quantity:</label>
+                          <input class="form-control" type="number" id="quantity" name="quantity" min="1" max="{{ product.quantity }}" required>
+                        </div>
+                      </div>
+                      <div class="row pt-3">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-shopping-cart"></i> Add to cart</button><button class="btn btn-outline-primary"><i class="fa fa-heart"></i> Add to wishlist</button>
+                      </div>
+                    </form>
+
+                  </div>
+                  <div data-slider-id="1" class="owl-thumbs">
+                    {% for image in images %}
+                    <button class="owl-thumb-item"><img src="{{ image.image.url }}" alt="" class="img-fluid"></button>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div id="details" class="box">
+                <p></p>
+                <h4>Product details</h4>
+                <p>White lace top, woven, has a round neck, short sleeves, has knitted lining attached</p>
+                <h4>Material &amp; care</h4>
+                <ul>
+                  <li>Polyester</li>
+                  <li>Machine wash</li>
+                </ul>
+                <h4>Size &amp; Fit</h4>
+                <ul>
+                  <li>Regular fit</li>
+                  <li>The model (height 5'8" and chest 33") is wearing a size S</li>
+                </ul>
+                <blockquote>
+                  <p><em>Define style this season with Armani's new range of trendy tops, crafted with intricate details. Create a chic statement look by teaming this lace number with skinny jeans and pumps.</em></p>
+                </blockquote>
+                <hr>
+                <div class="social">
+                  <h4>Show it to your friends</h4>
+                  <p><a href="#" class="external facebook"><i class="fa fa-facebook"></i></a><a href="#" class="external gplus"><i class="fa fa-google-plus"></i></a><a href="#" class="external twitter"><i class="fa fa-twitter"></i></a><a href="#" class="email"><i class="fa fa-envelope"></i></a></p>
+                </div>
+              </div>
+              <div class="row same-height-row">
+                <div class="col-md-3 col-sm-6">
+                  <div class="box same-height">
+                    <h3>You may also like these products</h3>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product2.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product2_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product2.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product1.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product1_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product1.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product3.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product3_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product3.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+              </div>
+              <div class="row same-height-row">
+                <div class="col-md-3 col-sm-6">
+                  <div class="box same-height">
+                    <h3>Products viewed recently</h3>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product2.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product2_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product2.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product1.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product1_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product1.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <div class="product same-height">
+                    <div class="flip-container">
+                      <div class="flipper">
+                        <div class="front"><a href="detail.html"><img src="img/product3.jpg" alt="" class="img-fluid"></a></div>
+                        <div class="back"><a href="detail.html"><img src="img/product3_2.jpg" alt="" class="img-fluid"></a></div>
+                      </div>
+                    </div><a href="detail.html" class="invisible"><img src="img/product3.jpg" alt="" class="img-fluid"></a>
+                    <div class="text">
+                      <h3>Fur coat</h3>
+                      <p class="price">$143</p>
+                    </div>
+                  </div>
+                  <!-- /.product-->
+                </div>
+              </div>
+            </div>
+            <!-- /.col-md-9-->
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+

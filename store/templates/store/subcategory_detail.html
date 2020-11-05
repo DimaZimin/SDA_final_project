@@ -1,0 +1,161 @@
+{% extends 'store/base.html' %}
+{% load filter_tags %}
+{% block content %}
+ <div id="content">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <!-- breadcrumb-->
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li>
+              <li aria-current="page" class="breadcrumb-item active text-capitalize"><a href="{% url 'store:gender-category-list' current_gender %}">{{ current_gender }}</a> </li>
+              <li aria-current="page" class="breadcrumb-item active text-capitalize">{{ subcategory }}</li>
+            </ol>
+          </nav>
+        </div>
+        <div class="col-lg-3">
+          <!--
+          *** MENUS AND FILTERS ***
+          _________________________________________________________
+          -->
+          <div class="card sidebar-menu mb-4">
+            <div class="card-header">
+              <h3 class="h4 card-title">Categories</h3>
+            </div>
+
+            <div class="card-body">
+              <ul class="nav nav-pills flex-column category-menu">
+                  {% for gen in genders %}{% if gen != 'unisex' %}
+                  {% product_amount_by_gender_tag gen as amount %}
+                <li><a href="{% url 'store:gender-category-list' gen %}" class="nav-link {% if gen == current_gender %}active{% endif %}">{{ gen }} <span class="badge badge-secondary">{{ amount }}</span></a>
+                  <ul class="list-unstyled">
+                      {% for category in static_categories %}
+                      {% subcategory_tag category.id 'gen' as subcategories %}
+                    <li><a href="" class="nav-link" data-toggle="collapse" data-target="#{{ gen }}{{ category.name }}" aria-expanded="false" aria-controls="{{ category.name }}">{{ category.name }}</a></li>
+                        <div class="pl-4" id="{{ gen }}{{ category.name }}" aria-expanded="true">
+                          {% for subcategory in subcategories %}
+                          <li class="font-italic"><a href="{% url 'store:subcategory-product-list' gen subcategory.slug %}">{{ subcategory.name }}</a></li>
+                          {% endfor %}
+                        </div>
+                      <hr>
+                      {% endfor %}
+                  </ul>
+                </li>
+                  {% endif %}
+                  {% endfor %}
+              </ul>
+            </div>
+          </div>
+          <div class="card sidebar-menu mb-4">
+            <div class="card-header">
+              <h3 class="h4 card-title">Brands <a href="#" class="btn btn-sm btn-danger pull-right"><i class="fa fa-times-circle"></i> Clear</a></h3>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="form-group">
+                  {% for brand in brands %}
+                  {% brands_amount_tag brand.id as amount %}
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox"> {{ brand.name }}  ({{ amount }})
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+                <button class="btn btn-default btn-sm btn-primary"><i class="fa fa-pencil"></i> Apply</button>
+              </form>
+            </div>
+          </div>
+          <div class="card sidebar-menu mb-4">
+            <div class="card-header">
+              <h3 class="h4 card-title">Colors <a href="#" class="btn btn-sm btn-danger pull-right"><i class="fa fa-times-circle"></i> Clear</a></h3>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="form-group">
+                    {% for color in colors %}
+                    {% brands_amount_tag color.id as amount %}
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox"><span class="colour white"></span> {{ color.name }} ({{ amount }})
+                    </label>
+                  </div>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-default btn-sm btn-primary"><i class="fa fa-pencil"></i> Apply</button>
+              </form>
+            </div>
+          </div>
+          <!-- *** MENUS AND FILTERS END ***-->
+          <div class="banner"><a href="#"><img src="img/banner.jpg" alt="sales 2014" class="img-fluid"></a></div>
+        </div>
+        <div class="col-lg-9">
+          <div class="box">
+            <h1 class="text-capitalize">{{ gender }}</h1>
+            <p>In our {{ gender }} department we offer wide selection of the best products we have found and carefully selected worldwide.
+            </p>
+          </div>
+          <div class="box info-bar">
+            <div class="row">
+              <div class="col-md-12 col-lg-4 products-showing">Showing <strong>12</strong> of <strong>25</strong> products</div>
+              <div class="col-md-12 col-lg-7 products-number-sort">
+                <form class="form-inline d-block d-lg-flex justify-content-between flex-column flex-md-row">
+                  <div class="products-number"><strong>Show</strong><a href="#" class="btn btn-sm btn-primary">12</a><a href="#" class="btn btn-outline-secondary btn-sm">24</a><a href="#" class="btn btn-outline-secondary btn-sm">All</a><span>products</span></div>
+                  <div class="products-sort-by mt-2 mt-lg-0"><strong>Sort by</strong>
+                    <select name="sort-by" class="form-control">
+                      <option>Price</option>
+                      <option>Name</option>
+                      <option>Sales first</option>
+                    </select>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="row products">
+              {% for product in products %}
+            <div class="col-lg-4 col-md-6">
+              <div class="product">
+                <div class="flip-container">
+                  <div class="flipper">
+                    <div class="front"><a href="{% url 'store:product-detail' product.gender product.subcategory product.slug %}"><img src="{{ product.image.url }}" alt="" class="img-fluid"></a></div>
+                    <div class="front"><a href="{% url 'store:product-detail' product.gender product.subcategory product.slug %}"><img src="{{ product.image.url }}" alt="" class="img-fluid"></a></div>
+                  </div>
+              </div>
+                <a href="{% url 'store:product-detail' product.gender product.subcategory product.slug %}" class="invisible"><img src="{{ product.image.url }}" alt="" width="200" class="img-fluid"></a>
+                <div class="text">
+                  <h3><a href="{% url 'store:product-detail' product.gender product.subcategory product.slug %}">{{ product.name }}</a></h3>
+                  <p class="price">
+                    <del></del>
+                    {{ product.price }}$
+                  </p>
+                  <p class="buttons"><a href="{% url 'store:product-detail' product.gender product.subcategory product.slug %}" class="btn btn-outline-secondary">View detail</a><a href="basket.html" class="btn btn-primary"><i class="fa fa-shopping-cart"></i>Add to cart</a></p>
+                </div>
+                <!-- /.text-->
+              </div>
+              <!-- /.product            -->
+            </div>
+            <!-- /.products-->
+              {% endfor %}
+          </div>
+          <div class="pages">
+            <p class="loadMore"><a href="#" class="btn btn-primary btn-lg"><i class="fa fa-chevron-down"></i> Load more</a></p>
+            <nav aria-label="Page navigation example" class="d-flex justify-content-center">
+              <ul class="pagination">
+                <li class="page-item"><a href="#" aria-label="Previous" class="page-link"><span aria-hidden="true">«</span><span class="sr-only">Previous</span></a></li>
+                <li class="page-item active"><a href="#" class="page-link">1</a></li>
+                <li class="page-item"><a href="#" class="page-link">2</a></li>
+                <li class="page-item"><a href="#" class="page-link">3</a></li>
+                <li class="page-item"><a href="#" class="page-link">4</a></li>
+                <li class="page-item"><a href="#" class="page-link">5</a></li>
+                <li class="page-item"><a href="#" aria-label="Next" class="page-link"><span aria-hidden="true">»</span><span class="sr-only">Next</span></a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /.col-lg-9-->
+      </div>
+    </div>
+  </div>
+{% endblock %}
